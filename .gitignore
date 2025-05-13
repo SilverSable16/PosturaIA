@@ -1,0 +1,7 @@
+# Ignorar db.py
+db.py
+
+# Ignorar la carpeta de Python
+__pycache__/
+*.pyc
+*.pyo
