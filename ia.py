@@ -6,19 +6,18 @@ from fpdf import FPDF
 import tkinter as tk
 from tkinter import filedialog
 
-# Variable para almacenar la postura actual del usuario
+# Variable para la postura actual
 postura_actual = None
 
 def guardar_conversacion(mensaje_usuario, respuesta_agente):
     db = conectar_db()
     cursor = db.cursor()
     
-    # Verificamos si la conversación ya existe
     query_check = "SELECT COUNT(*) FROM Conversaciones WHERE mensaje_usuario = %s AND respuesta_agente = %s"
     cursor.execute(query_check, (mensaje_usuario, respuesta_agente))
     count = cursor.fetchone()[0]
     
-    # Si no existe, insertamos la conversación
+
     if count == 0:
         query = "INSERT INTO Conversaciones (mensaje_usuario, respuesta_agente) VALUES (%s, %s)"
         cursor.execute(query, (mensaje_usuario, respuesta_agente))
@@ -31,7 +30,7 @@ def obtener_respuesta(tipo, mensaje_usuario):
     db = conectar_db()
     cursor = db.cursor(dictionary=True)
     
-    # Consultamos la base de datos para obtener la respuesta
+
     query = "SELECT respuesta_agente FROM RespuestasSaludo WHERE tipo = %s AND mensaje_usuario = %s"
     cursor.execute(query, (tipo, mensaje_usuario))
     
@@ -49,9 +48,9 @@ def obtener_respuestas_comunes(tiempo_periodo):
     db = conectar_db()
     cursor = db.cursor(dictionary=True)
 
-    # Determinamos el filtro de fecha según el periodo solicitado
+
     if tiempo_periodo == "hoy":
-        fecha_inicio = datetime.now().strftime('%Y-%m-%d')  # Formato de fecha: YYYY-MM-DD
+        fecha_inicio = datetime.now().strftime('%Y-%m-%d') 
         query = """
             SELECT respuesta_agente, COUNT(*) AS conteo
             FROM conversaciones
@@ -183,42 +182,40 @@ def obtener_listado_ejercicios():
         return "No se encontraron ejercicios en la base de datos."
 
 
-# Variable para almacenar la postura actual del usuario
+
 postura_actual = None
 
 def crear_pdf_respuesta(postura, recomendacion, ejercicios):
-    # Inicializar el objeto PDF
+
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     
-    # Título
+
     pdf.set_font("Arial", 'B', 16)
     pdf.cell(200, 10, txt="Consulta de Postura", ln=True, align="C")
     
-    # Fecha de creación
     pdf.ln(10)
     fecha_hoy = datetime.now().strftime('%d/%m/%Y')
     pdf.set_font("Arial", '', 12)
     pdf.cell(200, 10, txt=f"Fecha: {fecha_hoy}", ln=True)
     
-    # Información sobre la postura
+
     pdf.ln(10)
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(200, 10, txt=f"Postura: {postura}", ln=True)
     pdf.set_font("Arial", '', 12)
     pdf.multi_cell(0, 10, txt=recomendacion)  # Descripción de la recomendación
     
-    # Ejercicios
     pdf.ln(10)
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(200, 10, txt="Ejercicios recomendados:", ln=True)
     pdf.set_font("Arial", '', 12)
-    pdf.multi_cell(0, 10, txt=ejercicios)  # Descripción de los ejercicios
+    pdf.multi_cell(0, 10, txt=ejercicios) 
     
-    # Solicitar la ubicación y el nombre del archivo PDF
+   
     root = tk.Tk()
-    root.withdraw()  # Ocultar la ventana raíz de tkinter
+    root.withdraw() 
     
     file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
     if file_path:
@@ -232,26 +229,24 @@ def crear_pdf_respuesta(postura, recomendacion, ejercicios):
 def procesar_prompt(prompt):
     global postura_actual
     
-    # Convertimos el mensaje a minúsculas para que la comparación sea más sencilla
     prompt = prompt.strip().lower()
-    
-    # Lista de saludos y despedidas
+
     saludos = ["hola", "como estas", "que hay", "oye", "buenos dias", "buenas tardes", "buenas noches"]
     despedidas = ["adios", "salir", "nos vemos", "chau"]
     
-    # Si el mensaje contiene un saludo
+
     if prompt in saludos:
         respuesta = obtener_respuesta('saludo', prompt)
         guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
         return respuesta
     
-    # Si el mensaje contiene una despedida
+
     elif prompt in despedidas:
         respuesta = obtener_respuesta('despedida', prompt)
         guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
         return respuesta
     
-    # Si el mensaje contiene "respuestas comunes", "respuestas" o "comunes" con un período de tiempo (mes, semana, hoy)
+ 
     if "respuestas" in prompt and ("comunes" in prompt or "comunes del mes" in prompt or "comunes de la semana" in prompt or "comunes hoy" in prompt):
         if "hoy" in prompt:
             respuesta = obtener_respuestas_comunes("hoy")
@@ -262,54 +257,52 @@ def procesar_prompt(prompt):
         else:
             respuesta = "Por favor, dime si quieres las respuestas comunes de hoy, semana o mes."
         
-        guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
+        guardar_conversacion(prompt, respuesta)  
         return respuesta
     
-    # Si el mensaje contiene "listado de posturas" o "listado de ejercicios"
+
     if "listado de posturas" in prompt:
         respuesta = obtener_listado_posturas()
-        guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
+        guardar_conversacion(prompt, respuesta) 
         return respuesta
     
     if "listado de los ejercicios" in prompt:
         respuesta = obtener_listado_ejercicios()
-        guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
+        guardar_conversacion(prompt, respuesta)  
         return respuesta
     
-    # Si el mensaje contiene "postura [nombre]" o "ejercicios para la postura [nombre]"
     match = re.search(r"(postura|ejercicios\s+para\s+la\s+postura)\s+(\w+(\s\w+)*)", prompt)
     if match:
-        postura = match.group(2).strip()  # Captura el nombre de la postura (permitiendo múltiples palabras)
-        postura_actual = postura  # Guardamos la postura mencionada por el usuario
+        postura = match.group(2).strip()  
+        postura_actual = postura  
         
-        # Si el mensaje es "postura [nombre]", obtenemos la recomendación
+
         if "postura" in match.group(1):
             respuesta = obtener_recomendacion(postura)
-        # Si el mensaje es "ejercicios para la postura [nombre]", obtenemos los ejercicios
+   
         elif "ejercicios" in match.group(1):
             respuesta = obtener_ejercicios(postura)
         
-        guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
+        guardar_conversacion(prompt, respuesta) 
         return respuesta
     
-    # Si el usuario solo menciona "ejercicios", pero ya tiene una postura registrada
+
     if "ejercicios" in prompt:
         if postura_actual:
             respuesta = obtener_ejercicios(postura_actual)
-            guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
+            guardar_conversacion(prompt, respuesta) 
             return respuesta
         else:
             respuesta = "¿Puedes decirme de qué postura quieres los ejercicios? Por ejemplo, 'ejercicios para postura encorvado'."
-            guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
+            guardar_conversacion(prompt, respuesta)  
             return respuesta
     
-    # Si el mensaje incluye "crear pdf" o "guardar como pdf"
     if "crea un pdf" in prompt or "guardar como pdf" in prompt:
         respuesta = crear_pdf_respuesta(postura_actual, "Recomendación para la postura", "Ejercicios recomendados para la postura.")
-        guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
+        guardar_conversacion(prompt, respuesta)  
         return respuesta
     
     else:
         respuesta = "Lo siento, no entendí eso. ¿Puedes intentar de nuevo?"
-        guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
+        guardar_conversacion(prompt, respuesta) 
         return respuesta
