@@ -237,13 +237,13 @@ def procesar_prompt(prompt):
 
     if prompt in saludos:
         respuesta = obtener_respuesta('saludo', prompt)
-        guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
+        guardar_conversacion(prompt, respuesta) 
         return respuesta
     
 
     elif prompt in despedidas:
         respuesta = obtener_respuesta('despedida', prompt)
-        guardar_conversacion(prompt, respuesta)  # Guardamos la conversación
+        guardar_conversacion(prompt, respuesta) 
         return respuesta
     
  
@@ -261,7 +261,7 @@ def procesar_prompt(prompt):
         return respuesta
     
 
-    if "listado de posturas" in prompt:
+    if "listado de las posturas" in prompt:
         respuesta = obtener_listado_posturas()
         guardar_conversacion(prompt, respuesta) 
         return respuesta
