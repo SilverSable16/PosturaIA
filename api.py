@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from ia import procesar_prompt
 from db import conectar_db
+from fastapi.responses import JSONResponse
+import psycopg2.extras
 
 app = FastAPI()
 
@@ -44,12 +46,13 @@ def registrar_analisis(data: AnalisisEntrada):
 @app.get("/posturas")
 def obtener_posturas():
     db = conectar_db()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cursor.execute("SELECT id, name, body_part, description FROM postures")
         posturas = cursor.fetchall()
-        return JSONResponse(content=posturas)
+        # Convertir los resultados a lista de diccionarios
+        posturas_dict = [dict(row) for row in posturas]
+        return JSONResponse(content=posturas_dict)
     finally:
         cursor.close()
         db.close()
-
