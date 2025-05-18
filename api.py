@@ -32,10 +32,11 @@ def registrar_analisis(data: AnalisisEntrada):
     try:
         db = conectar_db()
         cursor = db.cursor()
-        query = """
-        INSERT INTO posture_analyses (user_id, posture_score, status, posture_id, createdAt, updatedAt)
+       query = """
+        INSERT INTO posture_analyses ("user_id", "posture_score", "status", "posture_id", "createdAt", "updatedAt")
         VALUES (%s, %s, %s, %s, NOW(), NOW())
         """
+
         cursor.execute(query, (data.user_id, data.score, data.status, data.posture_id))
         db.commit()
         return {"message": "Análisis guardado con éxito"}
