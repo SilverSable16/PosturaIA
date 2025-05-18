@@ -1,4 +1,3 @@
-import mysql.connector
 from db import conectar_db
 import re
 from datetime import datetime, timedelta
