@@ -34,3 +34,14 @@ def registrar_analisis(data: AnalisisEntrada):
     finally:
         cursor.close()
         db.close()
+
+app.get('/posturas', async (req, res) => {
+  try {
+    const posturas = await Posture.findAll(); // o tu forma de acceder a la DB
+    res.json(posturas);
+  } catch (error) {
+    console.error("Error al obtener posturas:", error);
+    res.status(500).json({ error: 'Error al obtener posturas' });
+  }
+});
+
