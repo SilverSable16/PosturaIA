@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from ia import procesar_prompt
+from db import conectar_db
 
 app = FastAPI()
 
