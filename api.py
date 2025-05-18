@@ -35,13 +35,15 @@ def registrar_analisis(data: AnalisisEntrada):
         cursor.close()
         db.close()
 
-app.get('/posturas', async (req, res) => {
-  try {
-    const posturas = await Posture.findAll(); // o tu forma de acceder a la DB
-    res.json(posturas);
-  } catch (error) {
-    console.error("Error al obtener posturas:", error);
-    res.status(500).json({ error: 'Error al obtener posturas' });
-  }
-});
+@app.get("/posturas")
+def obtener_posturas():
+    db = conectar_db()
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT id, name, body_part, description FROM postures")
+        posturas = cursor.fetchall()
+        return JSONResponse(content=posturas)
+    finally:
+        cursor.close()
+        db.close()
 
