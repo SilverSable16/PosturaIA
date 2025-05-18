@@ -60,3 +60,9 @@ def obtener_posturas():
     finally:
         cursor.close()
         db.close()
+
+@app.post("/ia")
+def procesar_ia(data: MensajeUsuario):
+    respuesta = procesar_prompt(data.mensaje)
+    return {"respuesta": respuesta}
+
