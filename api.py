@@ -13,6 +13,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+class AnalisisEntrada(BaseModel):
+    user_id: int
+    score: float
+    status: str
+    posture_id: int
 
 # Modelo para la entrada del usuario
 class MensajeUsuario(BaseModel):
