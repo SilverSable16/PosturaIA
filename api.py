@@ -32,7 +32,6 @@ def registrar_analisis(data: AnalisisEntrada):
     try:
         db = conectar_db()
         cursor = db.cursor()
-
         query = """
         INSERT INTO posture_analyses (user_id, posture_score, status, posture_id, createdAt, updatedAt)
         VALUES (%s, %s, %s, %s, NOW(), NOW())
@@ -40,14 +39,13 @@ def registrar_analisis(data: AnalisisEntrada):
         cursor.execute(query, (data.user_id, data.score, data.status, data.posture_id))
         db.commit()
         return {"message": "Análisis guardado con éxito"}
-
     except Exception as e:
-        print("❌ Error interno en /analisis:", e)
+        print("❌ Error al registrar análisis:", e)
         return JSONResponse(status_code=500, content={"error": str(e)})
-
     finally:
         cursor.close()
         db.close()
+
 
 @app.get("/posturas")
 def obtener_posturas():
